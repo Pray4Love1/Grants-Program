@@ -3,11 +3,16 @@ name: Enforce PR labels
 on:
   pull_request:
     types: [labeled, unlabeled, opened, edited, synchronize]
+
 jobs:
   enforce-label:
+    name: Enforce required and banned labels
     runs-on: ubuntu-latest
     steps:
-    - uses: yogevbd/enforce-label-action@2.1.0
-      with:
-        BANNED_LABELS: "admin-review"
-        BANNED_LABELS_DESCRIPTION: "Remove `admin-review` label for merge"
+      - name: Enforce label rules
+        uses: yogevbd/enforce-label-action@2.1.0
+        with:
+          REQUIRED_LABELS: "type/*"
+          REQUIRED_LABELS_DESCRIPTION: "Each PR must include at least one label starting with `type/` (e.g., `type/bug`, `type/feature`)."
+          BANNED_LABELS: "admin-review"
+          BANNED_LABELS_DESCRIPTION: "The `admin-review` label is reserved and must be removed before merging."
