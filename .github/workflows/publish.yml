@@ -7,27 +7,36 @@ on:
 
 jobs:
   build:
-    if:  github.repository_owner == 'w3f'
     name: build and deploy
+    if: github.repository_owner == 'w3f'
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 22
+
+      # (Optional) only keep if you truly need full git history
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Publish
         run: |
           git config --global user.email "grants-deployer@users.noreply.github.com"
           git config --global user.name "grants-deployer"
           echo "machine github.com login grants-deployer password ${{ secrets.ACCESS_KEY }}" > ~/.netrc
-          yarn && yarn build && GIT_USER=grants-deployer PUBLISHING=true yarn deploy
-      - if: ${{ failure() }}
+          yarn
+          yarn build
+          GIT_USER=grants-deployer PUBLISHING=true yarn deploy
+
+      - name: Failure Notification
+        if: failure()
         uses: fadenb/matrix-chat-message@v0.0.6
         with:
-          homeserver: 'matrix.web3.foundation'
+          homeserver: "matrix.web3.foundation"
           token: ${{ secrets.MATRIX_TOKEN }}
           channel: ${{ secrets.MATRIX_CHANNEL_ID }}
           message: |
